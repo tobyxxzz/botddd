@@ -3,6 +3,8 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime, timedelta
+from keep_alive import keep_alive
+keep_alive()
 import json
 import asyncio
 
@@ -45,13 +47,6 @@ async def on_ready():
     
     global painel_config
     painel_config = load_config()
-    
-    # Registrar views persistentes
-    bot.add_view(TicketCategoryView())
-    bot.add_view(PedirUperView())
-    bot.add_view(TicketFecharView())
-    bot.add_view(PixTicketView(0, "", 0))
-    bot.add_view(AprovacaoPixView(0, "", 0, 0))
 
 class TicketModal(discord.ui.Modal, title="Criar Ticket"):
     motivo = discord.ui.TextInput(
@@ -124,28 +119,28 @@ class TicketCategoryView(discord.ui.View):
         super().__init__(timeout=None)
         self.persistent = True
     
-    @discord.ui.button(label="Dúvida", style=discord.ButtonStyle.blurple, emoji="❓")
+    @discord.ui.button(label="Dúvida", style=discord.ButtonStyle.blurple, emoji="❓", custom_id="btn_duvida")
     async def duvida(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             await abrir_ticket_categoria(interaction, "Dúvida", "❓")
         except Exception as e:
             print(f"Erro ao criar ticket: {e}")
     
-    @discord.ui.button(label="Atendimento", style=discord.ButtonStyle.primary, emoji="👤")
+    @discord.ui.button(label="Atendimento", style=discord.ButtonStyle.primary, emoji="👤", custom_id="btn_atendimento")
     async def atendimento(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             await abrir_ticket_categoria(interaction, "Atendimento", "👤")
         except Exception as e:
             print(f"Erro ao criar ticket: {e}")
     
-    @discord.ui.button(label="Suporte", style=discord.ButtonStyle.success, emoji="🛠️")
+    @discord.ui.button(label="Suporte", style=discord.ButtonStyle.success, emoji="🛠️", custom_id="btn_suporte")
     async def suporte(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             await abrir_ticket_categoria(interaction, "Suporte", "🛠️")
         except Exception as e:
             print(f"Erro ao criar ticket: {e}")
     
-    @discord.ui.button(label="Reclamação", style=discord.ButtonStyle.danger, emoji="⚠️")
+    @discord.ui.button(label="Reclamação", style=discord.ButtonStyle.danger, emoji="⚠️", custom_id="btn_reclamacao")
     async def reclamacao(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             await abrir_ticket_categoria(interaction, "Reclamação", "⚠️")
@@ -157,7 +152,7 @@ class PedirUperView(discord.ui.View):
         super().__init__(timeout=None)
         self.persistent = True
     
-    @discord.ui.button(label="TICKET UPER", style=discord.ButtonStyle.primary, emoji="👑")
+    @discord.ui.button(label="TICKET UPER", style=discord.ButtonStyle.primary, emoji="👑", custom_id="btn_ticket_uper")
     async def pedir_uper(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             await abrir_ticket_categoria(interaction, "Pedir Uper", "👑")
@@ -243,7 +238,7 @@ class TicketFecharView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
     
-    @discord.ui.button(label="Fechar Ticket", style=discord.ButtonStyle.danger, emoji="🔒")
+    @discord.ui.button(label="Fechar Ticket", style=discord.ButtonStyle.danger, emoji="🔒", custom_id="btn_fechar_ticket")
     async def fechar_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
         channel = interaction.channel
         
@@ -367,7 +362,7 @@ class PixTicketView(discord.ui.View):
         self.meses = meses
         self.persistent = True
     
-    @discord.ui.button(label="Copiar PIX", style=discord.ButtonStyle.gray, emoji="📋")
+    @discord.ui.button(label="Copiar PIX", style=discord.ButtonStyle.gray, emoji="📋", custom_id="btn_copiar_pix")
     async def copiar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             config = painel_config.get(str(interaction.guild.id), {})
@@ -376,7 +371,7 @@ class PixTicketView(discord.ui.View):
         except Exception as e:
             print(f"Erro ao copiar PIX: {e}")
     
-    @discord.ui.button(label="Já Comprei", style=discord.ButtonStyle.success, emoji="✅")
+    @discord.ui.button(label="Já Comprei", style=discord.ButtonStyle.success, emoji="✅", custom_id="btn_ja_comprei")
     async def ja_comprei(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             guild = interaction.guild
@@ -421,7 +416,7 @@ class AprovacaoPixView(discord.ui.View):
         self.guild_id = guild_id
         self.persistent = True
     
-    @discord.ui.button(label="Aprovar", style=discord.ButtonStyle.success, emoji="✅")
+    @discord.ui.button(label="Aprovar", style=discord.ButtonStyle.success, emoji="✅", custom_id="btn_aprovar_pix")
     async def aprovar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             guild = interaction.client.get_guild(self.guild_id)
@@ -480,7 +475,7 @@ class AprovacaoPixView(discord.ui.View):
             except:
                 pass
     
-    @discord.ui.button(label="Rejeitar", style=discord.ButtonStyle.danger, emoji="❌")
+    @discord.ui.button(label="Rejeitar", style=discord.ButtonStyle.danger, emoji="❌", custom_id="btn_rejeitar_pix")
     async def rejeitar(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             try:

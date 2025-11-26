@@ -40,3 +40,7 @@ outputType = "console"
 
 [userenv.shared]
 INVITE_LINK = "https://discord.gg/aTVRYYWekE"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
